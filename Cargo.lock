@@ -75,7 +75,7 @@ version = "0.1.0"
 dependencies = [
  "clap 2.27.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "dbus 0.6.4 (registry+https://github.com/rust-lang/crates.io-index)",
- "flatkvm-qemu 0.1.0",
+ "flatkvm-qemu 0.1.0 (git+https://github.com/flatkvm/flatkvm-qemu)",
  "libc 0.2.47 (registry+https://github.com/rust-lang/crates.io-index)",
  "log 0.4.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde 1.0.84 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -84,12 +84,13 @@ dependencies = [
  "shlex 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "simplelog 0.5.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "udev 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "x11-clipboard 0.3.0",
+ "x11-clipboard 0.3.0 (git+https://github.com/flatkvm/x11-clipboard)",
 ]
 
 [[package]]
 name = "flatkvm-qemu"
 version = "0.1.0"
+source = "git+https://github.com/flatkvm/flatkvm-qemu#dcdedc2a5bd7cc8c7bdbe4449ec450819d1230f4"
 dependencies = [
  "dbus 0.6.4 (registry+https://github.com/rust-lang/crates.io-index)",
  "qapi 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -97,7 +98,7 @@ dependencies = [
  "serde_derive 1.0.84 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde_json 1.0.35 (registry+https://github.com/rust-lang/crates.io-index)",
  "shlex 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "x11-clipboard 0.3.0",
+ "x11-clipboard 0.3.0 (git+https://github.com/flatkvm/x11-clipboard)",
 ]
 
 [[package]]
@@ -377,6 +378,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 [[package]]
 name = "x11-clipboard"
 version = "0.3.0"
+source = "git+https://github.com/flatkvm/x11-clipboard#cbc0195d6bcb0e711be1b6de48a4358eade92aa8"
 dependencies = [
  "xcb 0.8.2 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
@@ -400,6 +402,7 @@ dependencies = [
 "checksum chrono 0.4.6 (registry+https://github.com/rust-lang/crates.io-index)" = "45912881121cb26fad7c38c17ba7daa18764771836b34fab7d3fbd93ed633878"
 "checksum clap 2.27.1 (registry+https://github.com/rust-lang/crates.io-index)" = "1b8c532887f1a292d17de05ae858a8fe50a301e196f9ef0ddb7ccd0d1d00f180"
 "checksum dbus 0.6.4 (registry+https://github.com/rust-lang/crates.io-index)" = "b9e1b39f3f6aa3d4a1522c4f0f9f1e9e9167bd93740a8690874caa7cf8ce47d7"
+"checksum flatkvm-qemu 0.1.0 (git+https://github.com/flatkvm/flatkvm-qemu)" = "<none>"
 "checksum itoa 0.4.3 (registry+https://github.com/rust-lang/crates.io-index)" = "1306f3464951f30e30d12373d31c79fbd52d236e5e896fd92f96ec7babbbe60b"
 "checksum libc 0.2.47 (registry+https://github.com/rust-lang/crates.io-index)" = "48450664a984b25d5b479554c29cc04e3150c97aa4c01da5604a2d4ed9151476"
 "checksum libdbus-sys 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)" = "18cb88963258d00f4962205dbb5933d82780d9962c8c8a064b651d2ad7189210"
@@ -436,4 +439,5 @@ dependencies = [
 "checksum winapi 0.3.6 (registry+https://github.com/rust-lang/crates.io-index)" = "92c1eb33641e276cfa214a0522acad57be5c56b10cb348b3c5117db75f3ac4b0"
 "checksum winapi-i686-pc-windows-gnu 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)" = "ac3b87c63620426dd9b991e5ce0329eff545bccbbb34f3be09ff6fb6ab51b7b6"
 "checksum winapi-x86_64-pc-windows-gnu 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)" = "712e227841d057c1ee1cd2fb22fa7e5a5461ae8e48fa2ca79ec42cfc1931183f"
+"checksum x11-clipboard 0.3.0 (git+https://github.com/flatkvm/x11-clipboard)" = "<none>"
 "checksum xcb 0.8.2 (registry+https://github.com/rust-lang/crates.io-index)" = "5e917a3f24142e9ff8be2414e36c649d47d6cc2ba81f16201cdef96e533e02de"
