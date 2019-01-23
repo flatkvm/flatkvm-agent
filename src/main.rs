@@ -25,7 +25,7 @@ use std::sync::Arc;
 use std::thread;
 
 use clap::{crate_authors, crate_version, App, Arg};
-use log::{debug, error};
+use log::{debug, error, info};
 use shlex::split;
 use simplelog::{CombinedLogger, Config, LevelFilter, WriteLogger};
 use x11_clipboard::{Clipboard, Source};
@@ -200,6 +200,7 @@ fn main() {
         }
     };
 
+    info!("Doing handshake");
     match agent.do_handshake(crate_version!()) {
         Ok(_) => (),
         Err(err) => {
@@ -207,6 +208,7 @@ fn main() {
             exit(-1);
         }
     };
+    info!("Handshake done");
 
     let (common_sender, common_receiver) = channel();
     let (clipboard_sender, clipboard_receiver) = channel();
@@ -241,6 +243,7 @@ fn main() {
     // Spawn a thread waiting for messages coming from the Host.
     let mut host_listener = HostListener::new(agent.try_clone().unwrap(), common_sender.clone());
     thread::spawn(move || loop {
+        info!("Waiting for events from Host");
         match host_listener.get_and_process_event() {
             Ok(_) => (),
             Err(err) => {
