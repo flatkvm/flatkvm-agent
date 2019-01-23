@@ -1,0 +1,20 @@
+[package]
+name = "flatkvm-agent"
+version = "0.1.0"
+authors = ["Sergio Lopez <slp@sinrega.org>"]
+edition = "2018"
+
+[dependencies]
+clap = "=2.27.1"
+dbus = "0.6.4"
+log = "0.4.6"
+serde = "1.0"
+serde_json = "1.0"
+serde_derive = "1.0"
+shlex = "0.1.1"
+simplelog = "^0.5.0"
+udev = "0.2.0"
+libc = "0.2.47"
+
+flatkvm-qemu = { git = "https://github.com/flatkvm/flatkvm-qemu" }
+x11-clipboard = { git = "https://github.com/flatkvm/x11-clipboard" }
