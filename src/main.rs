@@ -200,6 +200,8 @@ fn main() {
         }
     };
 
+    let mut agent_writer = agent.try_clone().unwrap();
+
     info!("Doing handshake");
     match agent.do_handshake(crate_version!()) {
         Ok(_) => (),
@@ -241,7 +243,7 @@ fn main() {
     });
 
     // Spawn a thread waiting for messages coming from the Host.
-    let mut host_listener = HostListener::new(agent.try_clone().unwrap(), common_sender.clone());
+    let mut host_listener = HostListener::new(agent, common_sender.clone());
     thread::spawn(move || loop {
         info!("Waiting for events from Host");
         match host_listener.get_and_process_event() {
@@ -266,7 +268,7 @@ fn main() {
         match msg {
             message::Message::LocalClipboardEvent(ce) => {
                 debug!("Clipboard event: {}", ce.data);
-                agent.send_clipboard_event(ce).unwrap();
+                agent_writer.send_clipboard_event(ce).unwrap();
             }
             message::Message::RemoteClipboardEvent(ce) => {
                 debug!("RemoteClipboard: {}", ce.data);
@@ -285,11 +287,11 @@ fn main() {
             }
             message::Message::DbusNotification(dn) => {
                 debug!("DbusNotification");
-                agent.send_dbus_notification(dn).unwrap();
+                agent_writer.send_dbus_notification(dn).unwrap();
             }
             message::Message::AppExit(ec) => {
                 debug!("AppExit");
-                match agent.send_exit_code(ec) {
+                match agent_writer.send_exit_code(ec) {
                     Ok(_) => (),
                     Err(err) => {
                         error!("can't send exit code: {}", err.to_string());
@@ -300,7 +302,7 @@ fn main() {
             }
             message::Message::MountRequest(dir) => {
                 debug!("MountRequest");
-                match do_mount_request(&mut agent, dir) {
+                match do_mount_request(&mut agent_writer, dir) {
                     Ok(_) => (),
                     Err(err) => {
                         error!("error servicing mount request: {}", err.to_string());
@@ -310,7 +312,7 @@ fn main() {
             }
             message::Message::RunRequest(rr) => {
                 debug!("RunRequest");
-                match do_run_request(&mut agent, common_sender.clone(), rr) {
+                match do_run_request(&mut agent_writer, common_sender.clone(), rr) {
                     Ok(_) => (),
                     Err(err) => {
                         error!("error sevicing run request: {}", err.to_string());
