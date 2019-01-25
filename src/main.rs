@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+use std::env;
 use std::fs::create_dir_all;
 use std::fs::File;
 use std::path::PathBuf;
@@ -39,16 +40,27 @@ mod message;
 mod udevmon;
 
 fn do_mount_request(agent: &mut AgentGuest, dir: QemuSharedDir) -> Result<(), String> {
-    let target = match dir.dir_type {
-        QemuSharedDirType::FlatpakSystemDir => "/var/lib/flatpak".to_string(),
-        QemuSharedDirType::FlatpakUserDir => "/root/.local/share/flatpak".to_string(),
-        QemuSharedDirType::FlatpakAppDir => format!("/root/.var/app/{}", dir.app_name),
+    let homedir = match env::var("HOME") {
+        Ok(home) => home,
+        Err(_) => "/home/flatkvm".to_string(),
     };
 
-    create_dir_all(&target).map_err(|err| err.to_string())?;
+    let target = match dir.dir_type {
+        QemuSharedDirType::FlatpakSystemDir => "/var/lib/flatpak".to_string(),
+        QemuSharedDirType::FlatpakUserDir => {
+            let d = format!("{}/.local/share/flatpak", homedir);
+            create_dir_all(&d).map_err(|err| err.to_string())?;
+            d
+        }
+        QemuSharedDirType::FlatpakAppDir => {
+            let d = format!("{}/.var/app/{}", homedir, dir.app_name);
+            create_dir_all(&d).map_err(|err| err.to_string())?;
+            d
+        }
+    };
 
     let argsline = format!(
-        "-t 9p -o trans=virtio,version=9p2000.L {} {}",
+        "mount -t 9p -o trans=virtio,version=9p2000.L {} {}",
         dir.tag, target
     );
     let args = match split(&argsline) {
@@ -56,7 +68,7 @@ fn do_mount_request(agent: &mut AgentGuest, dir: QemuSharedDir) -> Result<(), St
         None => return Err("can't format arguments".to_string()),
     };
 
-    let exit_status = Command::new("mount")
+    let exit_status = Command::new("sudo")
         .args(args)
         .status()
         .map_err(|err| err.to_string())?;
@@ -166,10 +178,15 @@ impl HostListener {
 }
 
 fn main() {
+    let homedir = match env::var("HOME") {
+        Ok(home) => home,
+        Err(_) => "/home/flatkvm".to_string(),
+    };
+
     CombinedLogger::init(vec![WriteLogger::new(
         LevelFilter::Debug,
         Config::default(),
-        File::create("/var/log/flatkvm-agent.log").unwrap(),
+        File::create(format!("{}/flatkvm-agent.log", homedir)).unwrap(),
     )])
     .unwrap();
 
