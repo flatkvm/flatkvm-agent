@@ -315,7 +315,6 @@ fn main() {
                         exit(-1);
                     }
                 }
-                break;
             }
             message::Message::MountRequest(dir) => {
                 debug!("MountRequest");
