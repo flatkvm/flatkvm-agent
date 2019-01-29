@@ -57,6 +57,16 @@ fn do_mount_request(agent: &mut AgentGuest, dir: QemuSharedDir) -> Result<(), St
             create_dir_all(&d).map_err(|err| err.to_string())?;
             d
         }
+        QemuSharedDirType::FlatpakPublicDir => {
+            let d = format!("{}/Public", homedir);
+            create_dir_all(&d).map_err(|err| err.to_string())?;
+            d
+        }
+        QemuSharedDirType::FlatpakDownloadDir => {
+            let d = format!("{}/Downloads", homedir);
+            create_dir_all(&d).map_err(|err| err.to_string())?;
+            d
+        }
     };
 
     let argsline = format!(
@@ -124,10 +134,6 @@ fn spawn_app(rr: AgentRunRequest) -> Result<Child, String> {
         args.push("--socket=session-bus");
     }
 
-    // Don't share HOME, as it's volatile. This actually increases the changes
-    // that app's data gets preserved, as it should be stored on the flatpak
-    // app directory.
-    args.push("--nofilesystem=home");
     args.push(&rr.app);
 
     debug!("running app with args: {:?}", args);
