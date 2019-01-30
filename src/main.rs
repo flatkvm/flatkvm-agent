@@ -290,11 +290,11 @@ fn main() {
     for msg in common_receiver {
         match msg {
             message::Message::LocalClipboardEvent(ce) => {
-                debug!("Clipboard event: {}", ce.data);
+                debug!("Clipboard event");
                 agent_writer.send_clipboard_event(ce).unwrap();
             }
             message::Message::RemoteClipboardEvent(ce) => {
-                debug!("RemoteClipboard: {}", ce.data);
+                debug!("RemoteClipboard");
                 cb_used_flag.store(true, Ordering::Relaxed);
                 match clipboard.store(
                     clipboard.setter.atoms.clipboard,
