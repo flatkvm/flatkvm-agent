@@ -193,6 +193,12 @@ impl HostListener {
                     .send(message::Message::RemoteClipboardEvent(ce))
                     .unwrap();
             }
+            AgentMessage::DbusNotificationClosed(nc) => {
+                debug!("AgentDbusNotificationClosed");
+                self.sender
+                    .send(message::Message::DbusNotificationClosed(nc))
+                    .unwrap();
+            }
             _ => return Err("Protocol error".to_string()),
         }
 
@@ -296,8 +302,9 @@ fn main() {
     });
 
     let dbus_sender = common_sender.clone();
+    let (dbus_nc_sender, dbus_nc_receiver) = channel();
     thread::spawn(move || {
-        dbus_listener::handle_dbus_notifications(dbus_sender);
+        dbus_listener::handle_dbus_notifications(dbus_sender, dbus_nc_receiver);
     });
 
     // Create another clipboard instance to store values.
@@ -328,6 +335,20 @@ fn main() {
             message::Message::DbusNotification(dn) => {
                 debug!("DbusNotification");
                 agent_writer.send_dbus_notification(dn).unwrap();
+            }
+            message::Message::DbusNotificationClosed(nc) => {
+                debug!("DbusNotificationClosed: {}", nc.id);
+                dbus_nc_sender.send(nc).unwrap();
+                /*
+                let path: Path<'static> = format!("/org/freedesktop/Notifications").into();
+                let sig = OrgFreedesktopNotificationsNotificationClosed {
+                    id: nc.id,
+                    reason: nc.reason,
+                };
+                dbus_conn
+                    .send(sig.to_emit_message(&path))
+                    .expect("sending DBus signal failed");
+                */
             }
             message::Message::AppExit(ec) => {
                 debug!("AppExit");

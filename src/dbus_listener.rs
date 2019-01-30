@@ -17,15 +17,18 @@
 use crate::message::Message;
 use dbus::arg::{RefArg, Variant};
 use dbus::tree;
-use dbus::{BusType, Connection};
+use dbus::{BusType, Connection, Path, SignalArgs};
 use flatkvm_qemu::dbus_codegen::*;
-use flatkvm_qemu::dbus_notifications::DbusNotification;
+use flatkvm_qemu::dbus_notifications::{DbusNotification, DbusNotificationClosed};
 use std::collections::HashMap;
-use std::sync::mpsc::Sender;
+use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::mpsc::{Receiver, Sender};
 use std::sync::Arc;
 use std::sync::Mutex;
+use std::time::Duration;
 
 static mut DBUS_SENDER: Option<Mutex<Sender<Message>>> = None;
+static DBUS_NOTIFICATION_ID: AtomicUsize = AtomicUsize::new(5);
 
 #[derive(Copy, Clone, Default, Debug)]
 struct TData;
@@ -86,6 +89,7 @@ impl OrgFreedesktopNotifications for Notification {
             app_name, replaces_id, app_icon, summary, body
         );
 
+        let nid = DBUS_NOTIFICATION_ID.fetch_add(1, Ordering::SeqCst);
         // Safe because the Option is only changed in handle_dbus_notifications,
         // and the Sender is protected by a Mutex.
         unsafe {
@@ -93,6 +97,7 @@ impl OrgFreedesktopNotifications for Notification {
                 let sender = sender_mutex.lock().unwrap();
                 sender
                     .send(Message::DbusNotification(DbusNotification {
+                        id: nid as u32,
                         summary: summary.to_string(),
                         body: body.to_string(),
                         expire_timeout,
@@ -101,7 +106,7 @@ impl OrgFreedesktopNotifications for Notification {
             }
         }
 
-        Ok(0)
+        Ok(nid as u32)
     }
 }
 
@@ -114,7 +119,10 @@ fn dbus_create_iface() -> tree::Interface<tree::MTFn<TData>, TData> {
     })
 }
 
-pub fn handle_dbus_notifications(sender: Sender<Message>) {
+pub fn handle_dbus_notifications(
+    sender: Sender<Message>,
+    receiver: Receiver<DbusNotificationClosed>,
+) {
     unsafe {
         DBUS_SENDER = Some(Mutex::new(sender));
     }
@@ -137,6 +145,15 @@ pub fn handle_dbus_notifications(sender: Sender<Message>) {
 
     c.add_handler(tree);
     loop {
-        c.iter(-1).next();
+        c.iter(500).next();
+        if let Ok(nc) = receiver.recv_timeout(Duration::new(0, 0)) {
+            let path: Path<'static> = format!("/org/freedesktop/Notifications").into();
+            let sig = OrgFreedesktopNotificationsNotificationClosed {
+                id: nc.id,
+                reason: nc.reason,
+            };
+            c.send(sig.to_emit_message(&path))
+                .expect("sending DBus signal failed");
+        }
     }
 }

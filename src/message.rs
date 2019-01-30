@@ -16,13 +16,14 @@
 
 use flatkvm_qemu::agent::AgentRunRequest;
 use flatkvm_qemu::clipboard::ClipboardEvent;
-use flatkvm_qemu::dbus_notifications::DbusNotification;
+use flatkvm_qemu::dbus_notifications::{DbusNotification, DbusNotificationClosed};
 use flatkvm_qemu::runner::QemuSharedDir;
 
 pub enum Message {
     LocalClipboardEvent(ClipboardEvent),
     RemoteClipboardEvent(ClipboardEvent),
     DbusNotification(DbusNotification),
+    DbusNotificationClosed(DbusNotificationClosed),
     MountRequest(QemuSharedDir),
     RunRequest(AgentRunRequest),
     AppExit(i32),
