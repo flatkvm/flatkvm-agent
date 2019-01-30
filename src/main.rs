@@ -134,6 +134,23 @@ fn spawn_app(rr: AgentRunRequest) -> Result<Child, String> {
         args.push("--socket=session-bus");
     }
 
+    // Don't share HOME, as it's volatile. This increases the chances that
+    // app's data gets preserved, as we force it to store it on the flatpak
+    // app's directory.
+    args.push("--nofilesystem=home");
+
+    // We use relative paths instead of XDG references to avoid depending on
+    // having a proper XDG configuration in the template.
+    if rr.public_share {
+        args.push("--filesystem=~/Public");
+    }
+    if rr.download {
+        args.push("--filesystem=~/Downloads");
+    }
+    // This trick is only needed for FirefoxDevEdition (which insist on
+    // escaping the sandbox to write on $HOME/.mozilla), but shouldn't hurt
+    // others, so we use this unconditionally.
+    args.push("--persist=.mozilla");
     args.push(&rr.app);
 
     debug!("running app with args: {:?}", args);
