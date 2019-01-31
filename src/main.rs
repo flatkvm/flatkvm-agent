@@ -134,6 +134,14 @@ fn spawn_app(rr: AgentRunRequest) -> Result<Child, String> {
         args.push("--socket=session-bus");
     }
 
+    // We use --nosocket=pulseaudio here so Flatpak doesn't fiddle with
+    // pulseaudio, allowing us to pass the PULSE_SERVER environment
+    // variable directly to the app.
+    if rr.pulse_client {
+        args.push("--nosocket=pulseaudio");
+        args.push("--env=PULSE_SERVER=10.0.2.2");
+    }
+
     // Don't share HOME, as it's volatile. This increases the chances that
     // app's data gets preserved, as we force it to store it on the flatpak
     // app's directory.
