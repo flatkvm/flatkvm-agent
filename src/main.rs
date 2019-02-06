@@ -29,7 +29,7 @@ use clap::{crate_authors, crate_version, App, Arg};
 use log::{debug, error, info};
 use shlex::split;
 use simplelog::{CombinedLogger, Config, LevelFilter, WriteLogger};
-use x11_clipboard::{Clipboard, Source};
+use x11_clipboard::Clipboard;
 
 use flatkvm_qemu::agent::*;
 use flatkvm_qemu::clipboard::*;
@@ -316,7 +316,7 @@ fn main() {
     });
 
     // Create another clipboard instance to store values.
-    let clipboard = Clipboard::new(Source::Clipboard).unwrap();
+    let clipboard = Clipboard::new().unwrap();
 
     // Process events coming from spawned threads.
     for msg in common_receiver {
