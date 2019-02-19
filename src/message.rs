@@ -26,5 +26,6 @@ pub enum Message {
     DbusNotificationClosed(DbusNotificationClosed),
     MountRequest(QemuSharedDir),
     RunRequest(AgentRunRequest),
+    LayoutRequest(String),
     AppExit(i32),
 }

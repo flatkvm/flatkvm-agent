@@ -121,6 +121,25 @@ fn do_run_request(
     Ok(())
 }
 
+fn do_layout_request(agent: &mut AgentGuest, layout: String) -> Result<(), String> {
+    let mut args = vec!["-layout"];
+
+    args.push(&layout);
+
+    let exit_status = Command::new("setxkbmap")
+        .args(args)
+        .status()
+        .map_err(|err| err.to_string())?;
+
+    let exit_code = match exit_status.code() {
+        Some(code) => code,
+        None => -1,
+    };
+
+    agent.send_ack(exit_code)?;
+    Ok(())
+}
+
 fn spawn_app(rr: AgentRunRequest) -> Result<Child, String> {
     let mut args = vec!["run"];
 
@@ -194,6 +213,12 @@ impl HostListener {
             AgentMessage::AgentRunRequest(rr) => {
                 debug!("AgentRunRequest");
                 self.sender.send(message::Message::RunRequest(rr)).unwrap();
+            }
+            AgentMessage::AgentLayoutRequest(lr) => {
+                debug!("AgentLayoutRequest");
+                self.sender
+                    .send(message::Message::LayoutRequest(lr.layout))
+                    .unwrap();
             }
             AgentMessage::ClipboardEvent(ce) => {
                 debug!("AgentClipboardEvent");
@@ -384,6 +409,16 @@ fn main() {
                     Ok(_) => (),
                     Err(err) => {
                         error!("error sevicing run request: {}", err.to_string());
+                        exit(-1);
+                    }
+                }
+            }
+            message::Message::LayoutRequest(layout) => {
+                debug!("LayoutRequest");
+                match do_layout_request(&mut agent_writer, layout) {
+                    Ok(_) => (),
+                    Err(err) => {
+                        error!("error servicing layout request: {}", err.to_string());
                         exit(-1);
                     }
                 }
